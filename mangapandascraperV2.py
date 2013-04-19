@@ -11,7 +11,7 @@ import tarfile
 import shutil
 import sys
 
-MANGA_DOMAIN = 'www.mangapanda.com'
+MANGA_DOMAIN = 'http://www.mangapanda.com'
 
 
 def get_issue_name(series_name , current_issue):
@@ -20,7 +20,7 @@ def get_issue_name(series_name , current_issue):
 
 	bit of a mangle
 	'''
-	first_page = urllib.urlopen('http://www.mangapanda.com/' + series_name + '/'+ str(current_issue) + '/1')
+	first_page = urllib.urlopen(MANGA_DOMAIN + '/' + series_name + '/'+ str(current_issue) + '/1')
 	soup = BeautifulSoup(first_page)
 	bottomchapter = soup.find("div" , {"id": "bottomchapter"})
 	mangainfo_bas = bottomchapter.find("div" , {"id": "mangainfo_bas"})
@@ -32,11 +32,9 @@ def scrape_issue(series_name , issue_number , save_directory):
 	'''
 	Scrape a given issue of a series
 	'''
-	print 'scraping issue ' + current_issue + ' ' + issue_name
-
 	issue_name = get_issue_name(series_name , issue_number)
 
-	issue_directory = '%s/%s %s' % (save_directory , current_issue , issue_name)
+	issue_directory = '%s%s/%s_%s' % (save_directory, series_name, issue_number, issue_name)
 
 	os.makedirs(issue_directory)
 
@@ -45,38 +43,38 @@ def scrape_issue(series_name , issue_number , save_directory):
 	
 	while found_all_pages:
 
-		page = urllib.urlopen('http://www.mangapanda.com/' + series_name + '/'+ current_issue + '/' + str(page_number))
+		page = urllib.urlopen('%s/%s/%s/%s' %  (MANGA_DOMAIN, series_name, issue_number, str(page_number)))
 
 		if page.code == 200:
 
-			''' find the image url '''
+			# find the image url
 			soup = BeautifulSoup(page)
 			image_div = soup.find("div", {"id": "imgholder"})
 			image_src = image_div.img.get('src')
 
-			''' save the image '''
+			# save the image
 			urllib.urlretrieve(image_src, issue_directory+ '/' + str(page_number) + '.jpg')
 
 			page_number+=1
 
 		else:
-			''' End of the issue as page doesnt exist '''
+			# End of the issue as page doesnt exist
 			found_all_pages = False
 
 
-	''' compress the new folder to a .cbz'''
+	# compress the new folder to a .cbz
 	compressTar = tarfile.open(issue_directory + ".cbz", "w:gz")
 	compressTar.add(issue_directory)
 	compressTar.close()
 
-	''' delete the folder '''
+	# delete the folder
 	shutil.rmtree(issue_directory)
 
 
 
 if __name__ == "__main__":
 	'''
-	Scrape an Manga from mangapanda
+	Scrape an Manga from mangapanda and save it as a .CBZ
 
 	Args Required
 
@@ -98,7 +96,7 @@ if __name__ == "__main__":
 	while current_issue_number <= end_issue_number:
 
 		print 'Scraping Issue: %s ' % current_issue_number
-		scrape_issue(series_name , current_issue_number , save_directory):
+		scrape_issue(series_name , current_issue_number , save_directory)
 		
 		current_issue_number+=1
 
