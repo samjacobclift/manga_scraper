@@ -1,7 +1,7 @@
 '''
-Better Manga Parser
-
 Scapes manga from mangapanda.com
+
+See README
 
 '''
 import urllib
