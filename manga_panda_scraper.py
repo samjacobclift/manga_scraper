@@ -2,8 +2,8 @@ import requests
 import os
 import tarfile
 import shutil
-import sys
 import urllib
+import argparse
 
 from BeautifulSoup import BeautifulSoup
 
@@ -70,9 +70,9 @@ def scrape_issue(series_name, issue_number, save_directory):
         page_number += 1
 
     # compress the new folder to a .cbz
-    compressTar = tarfile.open(issue_directory + ".cbz", "w:gz")
-    compressTar.add(issue_directory)
-    compressTar.close()
+    compress_tar = tarfile.open(issue_directory + ".cbz", "w:gz")
+    compress_tar.add(issue_directory)
+    compress_tar.close()
 
     # delete the folder
     shutil.rmtree(issue_directory)
@@ -81,26 +81,25 @@ def scrape_issue(series_name, issue_number, save_directory):
 if __name__ == "__main__":
     '''
     Scrape an Manga from mangapanda and save it as a .CBZ
-
-    Args Required
-
-    1) Series_Name i.e one-piece
-    2) start_number
-    3) end_number
-    4) save directory i.e /desktop creates a Folder at this directory containing the series
-
     '''
-    series_name = str(sys.argv[1])
-    start_issue_number = int(sys.argv[2])
-    end_issue_number = int(sys.argv[3])
-    save_directory = str(sys.argv[4])
+    parser = argparse.ArgumentParser(description='Scrape Some Manga')
+    parser.add_argument('start', type=int, help='start issue number')
+    parser.add_argument('end', type=int, help='end issue number')
+    parser.add_argument('name', type=str, help='name of manga')
+    parser.add_argument('folder', type=str, help='folder path to output to path (inlude trailing /)')
+
+    args = parser.parse_args()
+    series_name = args.name
+    start_issue_number = args.start
+    end_issue_number = args.end
+    save_directory = args.folder
 
     current_issue_number = start_issue_number
 
-    print 'Start Number:%s end Number:%s' % (start_issue_number, end_issue_number)
+    print('Start Number:{0} end Number:{1}'.format(start_issue_number, end_issue_number))
     while current_issue_number <= end_issue_number:
 
-        print 'Scraping Issue: %s ' % current_issue_number
+        print('Scraping Issue: {0}'.format(current_issue_number))
         scrape_issue(series_name, current_issue_number, save_directory)
 
         current_issue_number += 1
